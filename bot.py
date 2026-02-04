@@ -40,10 +40,13 @@ def receive():
 
 
 def send(msg):
-    url  = 'https://api.groupme.com/v3/bots/post'
-
-    data = {
+    print("BOT_ID:", os.getenv("BOT_ID"))
+    url = 'https://api.groupme.com/v3/bots/post'
+    payload = {
         'bot_id': os.getenv('BOT_ID'),
         'text': msg,
     }
-    r = requests.post(url, data=data)
+
+    r = requests.post(url, json=payload)
+    print("Send status:", r.status_code)
+    print("Send response:", r.text)

@@ -1,5 +1,8 @@
 import os
 import requests
+import csv
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from flask import Flask, request
 
@@ -50,3 +53,35 @@ def send(msg):
     r = requests.post(url, json=payload)
     print("Send status:", r.status_code)
     print("Send response:", r.text)
+
+@app.route("/cron/daily", methods=["GET"])
+def get_today_birthdays():
+    central = ZoneInfo("America/Chicago")
+    today = datetime.now(central)
+
+    today_day = today.day
+    today_month = today.strftime("%b")  # Jan, Feb, Mar, ...
+
+    matches = []
+
+    with open("birthday.csv", newline="", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        for row in reader:
+            if len(row) < 3:
+                continue
+
+            name = row[0].strip()
+            date_str = row[2].strip()  # e.g. "3-Feb"
+
+            try:
+                day_str, month_str = date_str.split("-")
+                bday_day = int(day_str)
+                bday_month = month_str
+            except ValueError:
+                continue
+
+            if bday_day == today_day and bday_month == today_month:
+                matches.append(name)
+
+    for match in matches :
+        send("Happy Birthday " + match + "!!!")

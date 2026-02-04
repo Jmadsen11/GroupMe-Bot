@@ -12,6 +12,7 @@ def home():
 
 @app.route('/', methods=['POST'])
 def receive():
+    data = request.json
     print('Incoming message:')
     print(data)
 

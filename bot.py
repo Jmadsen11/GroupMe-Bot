@@ -5,16 +5,31 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
+# Store last message (in memory)
+last_message = "No messages yet."
+
 @app.route('/', methods=['GET'])
 def home():
-    return 'You could put any content here you like, perhaps even a homepage for your bot!'
-
+    return f"""
+    <html>
+        <body>
+            <h1>Last GroupMe Message</h1>
+            <p>{last_message}</p>
+        </body>
+    </html>
+    """
 
 @app.route('/', methods=['POST'])
 def receive():
-    data = request.json
-    print('Incoming message:')
+    global last_message
+    data = request.get_json()
+
+    print("Incoming message:")
     print(data)
+
+    # Prevent self-reply
+    if data.get('sender_type') != 'bot':
+        last_message = f"{data.get('name')}: {data.get('text')}"
 
     # Prevent self-reply
     if data['sender_type'] != 'bot':
